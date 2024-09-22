@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import './App.css';
 import Alerts from './components/Alerts'; // Import Alerts component
 import Forecast from './components/Forecast';
@@ -14,38 +14,8 @@ function App() {
   const [timezone, setTimezone] = useState(0); // To store timezone offset
   const [alerts, setAlerts] = useState([]); // To store weather alerts
 
-  // Fetch weather and forecast data whenever the city changes
-  useEffect(() => {
-    if (city === 'current') {
-      getCurrentLocation();
-    } else {
-      fetchWeather(city);
-      fetchForecast(city);
-    }
-  }, [city, fetchWeather, getCurrentLocation]); // Include fetchWeather and getCurrentLocation in the dependencies
-
-  // Fetch current weather data and alerts
-  const fetchWeather = async (city) => {
-    try {
-      const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
-      );
-      const data = await response.json();
-      if (data.cod === 200) {
-        setWeatherData(data);
-        setTimezone(data.timezone); // Set the timezone offset
-        fetchWeatherAlerts(data.coord.lat, data.coord.lon); // Fetch alerts using coordinates
-      } else {
-        alert('City not found');
-        setWeatherData(null);
-      }
-    } catch (error) {
-      console.error('Error fetching weather data:', error);
-    }
-  };
-
   // Function to get current location
-  const getCurrentLocation = () => {
+  const getCurrentLocation = useCallback(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -60,10 +30,10 @@ function App() {
     } else {
       alert('Geolocation is not supported by this browser.');
     }
-  };
+  }, []);
 
   // Fetch current weather data using coordinates
-  const fetchWeatherByCoords = async (lat, lon) => {
+  const fetchWeatherByCoords = useCallback(async (lat, lon) => {
     try {
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
@@ -80,7 +50,27 @@ function App() {
     } catch (error) {
       console.error('Error fetching weather data:', error);
     }
-  };
+  }, []);
+
+  // Fetch current weather data and alerts
+  const fetchWeather = useCallback(async (city) => {
+    try {
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
+      );
+      const data = await response.json();
+      if (data.cod === 200) {
+        setWeatherData(data);
+        setTimezone(data.timezone); // Set the timezone offset
+        fetchWeatherAlerts(data.coord.lat, data.coord.lon); // Fetch alerts using coordinates
+      } else {
+        alert('City not found');
+        setWeatherData(null);
+      }
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+    }
+  }, []);
 
   // Fetch weather alerts based on coordinates
   const fetchWeatherAlerts = async (lat, lon) => {
@@ -114,6 +104,16 @@ function App() {
       console.error('Error fetching forecast data:', error);
     }
   };
+
+  // Fetch weather and forecast data whenever the city changes
+  useEffect(() => {
+    if (city === 'current') {
+      getCurrentLocation();
+    } else {
+      fetchWeather(city);
+      fetchForecast(city);
+    }
+  }, [city, fetchWeather, getCurrentLocation]); // Include fetchWeather and getCurrentLocation in the dependencies
 
   return (
     <div className={`app ${weatherData ? weatherData.weather[0].main.toLowerCase() : ''}`}>
