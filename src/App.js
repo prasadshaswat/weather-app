@@ -14,6 +14,8 @@ function App() {
   const [timezone, setTimezone] = useState(0); // To store timezone offset
   const [alerts, setAlerts] = useState([]); // To store weather alerts
 
+  const SAMPLE_CITY = 'New York'; // Define a sample city
+
   // Function to get current location
   const getCurrentLocation = useCallback(() => {
     if (navigator.geolocation) {
@@ -24,7 +26,7 @@ function App() {
         },
         (error) => {
           console.error('Error getting location:', error);
-          alert('Unable to retrieve your location. Please search for a city.');
+          alert('Unable to retrieve your location. Please search for a city or use a sample location.');
         }
       );
     } else {
@@ -119,6 +121,12 @@ function App() {
     <div className={`app ${weatherData ? weatherData.weather[0].main.toLowerCase() : ''}`}>
       <div className="container mx-auto p-4">
         <SearchBar setCity={setCity} />
+        <button onClick={() => setCity('current')} className="p-2 bg-blue-500 text-white rounded">
+          Use My Location
+        </button>
+        <button onClick={() => setCity(SAMPLE_CITY)} className="p-2 bg-green-500 text-white rounded ml-2">
+          Sample Location
+        </button>
         {weatherData && <WeatherCard weather={weatherData} timezone={timezone} />}
         {forecastData && <Forecast forecast={forecastData} timezone={timezone} />}
         {alerts.length > 0 && <Alerts alerts={alerts} />} {/* Show alerts if available */}
