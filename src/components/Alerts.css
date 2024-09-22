@@ -1,0 +1,12 @@
+.alert-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.alert {
+    transition: transform 0.2s;
+}
+
+.alert:hover {
+    transform: scale(1.05);
+}
