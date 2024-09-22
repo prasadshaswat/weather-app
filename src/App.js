@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import './App.css';
-import Alerts from './components/Alerts'; // Import Alerts component
+import Alerts from './components/Alerts';
 import Forecast from './components/Forecast';
 import SearchBar from './components/Searchbar';
 import WeatherCard from './components/WeatherCard';
@@ -13,8 +13,8 @@ function App() {
   const [city, setCity] = useState('jakarta'); // Default city
   const [timezone, setTimezone] = useState(0); // To store timezone offset
   const [alerts, setAlerts] = useState([]); // To store weather alerts
-
-  const SAMPLE_CITY = 'New York'; // Define a sample city
+  const [locationError, setLocationError] = useState(''); // To store location error messages
+  const [isDarkTheme, setIsDarkTheme] = useState(false); // State to manage theme
 
   // Function to get current location
   const getCurrentLocation = useCallback(() => {
@@ -26,11 +26,11 @@ function App() {
         },
         (error) => {
           console.error('Error getting location:', error);
-          alert('Unable to retrieve your location. Please search for a city or use a sample location.');
+          setLocationError('Unable to retrieve your location. Please enter a city.');
         }
       );
     } else {
-      alert('Geolocation is not supported by this browser.');
+      setLocationError('Geolocation is not supported by this browser.');
     }
   }, []);
 
@@ -44,7 +44,7 @@ function App() {
       if (data.cod === 200) {
         setWeatherData(data);
         setTimezone(data.timezone); // Set the timezone offset
-        fetchWeatherAlerts(lat, lon); // Fetch alerts using coordinates
+        fetchWeatherAlerts(data.coord.lat, data.coord.lon); // Fetch alerts using coordinates
       } else {
         alert('Location not found');
         setWeatherData(null);
@@ -107,26 +107,32 @@ function App() {
     }
   };
 
+  // Fetch weather and forecast data when the app loads
+  useEffect(() => {
+    getCurrentLocation();
+  }, [getCurrentLocation]);
+
   // Fetch weather and forecast data whenever the city changes
   useEffect(() => {
-    if (city === 'current') {
-      getCurrentLocation();
-    } else {
+    if (city) {
       fetchWeather(city);
       fetchForecast(city);
     }
-  }, [city, fetchWeather, getCurrentLocation]); // Include fetchWeather and getCurrentLocation in the dependencies
+  }, [city, fetchWeather]); // Include fetchWeather in the dependencies
+
+  // Toggle theme between light and dark
+  const toggleTheme = () => {
+    setIsDarkTheme(!isDarkTheme);
+  };
 
   return (
-    <div className={`app ${weatherData ? weatherData.weather[0].main.toLowerCase() : ''}`}>
+    <div className={`${isDarkTheme ? 'dark' : ''} app ${weatherData ? weatherData.weather[0].main.toLowerCase() : ''}`}>
       <div className="container mx-auto p-4">
-        <SearchBar setCity={setCity} />
-        <button onClick={() => setCity('current')} className="p-2 bg-blue-500 text-white rounded">
-          Use My Location
-        </button>
-        <button onClick={() => setCity(SAMPLE_CITY)} className="p-2 bg-green-500 text-white rounded ml-2">
-          Sample Location
-        </button>
+        <div className="flex justify-between items-center mb-4">
+          <SearchBar setCity={setCity} />
+          
+        </div>
+        {locationError && <p className="text-red-500 mt-2">{locationError}</p>} {/* Display location error */}
         {weatherData && <WeatherCard weather={weatherData} timezone={timezone} />}
         {forecastData && <Forecast forecast={forecastData} timezone={timezone} />}
         {alerts.length > 0 && <Alerts alerts={alerts} />} {/* Show alerts if available */}

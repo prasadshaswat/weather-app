@@ -59,3 +59,70 @@ body {
   font-family: 'Roboto', sans-serif;
   color: #333;
 }
+
+/* Base styles */
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Light Theme */
+.app {
+  background-color: #ffffff;
+  /* Light background */
+  color: #000000;
+  /* Dark text */
+}
+
+/* Light mode specific styles */
+.light .app {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.light .container {
+  border: 1px solid #ddd;
+  /* Light border */
+}
+
+/* Dark Theme */
+.dark .app {
+  background-color: #1a1a1a;
+  /* Dark background */
+  color: #ffffff;
+  /* Light text */
+}
+
+/* Dark mode specific styles */
+.dark .container {
+  border: 1px solid #444;
+  /* Dark border */
+}
+
+/* Component Styles */
+.container {
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 800px;
+  margin: auto;
+}
+
+button {
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  /* Button hover effect */
+}
+
+.alerts {
+  margin-top: 20px;
+}
+
+.weather-card,
+.forecast {
+  margin-top: 20px;
+}
